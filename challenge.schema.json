@@ -99,7 +99,6 @@
               "type": "array",
               "minItems": 1,
               "maxItems": 4,
-              "description": "Bentuk multi-port. Entri pertama adalah port primary. Tidak boleh dipakai bersama expose_port.",
               "items": {
                 "type": "object",
                 "required": [
@@ -124,9 +123,14 @@
                       "http"
                     ],
                     "default": "tcp"
+                  },
+                  "service": {
+                    "type": "string",
+                    "description": "Compose service that publishes this surface. Only for build_engine: compose, and only needed when more than one service builds an image."
                   }
                 }
-              }
+              },
+              "description": "Bentuk multi-port. Entri pertama adalah port primary. Tidak boleh dipakai bersama expose_port."
             },
             "memory_limit": {
               "type": "string",
