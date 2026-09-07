@@ -1,0 +1,173 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Nusahack Challenge Configuration Schema",
+  "type": "object",
+  "required": [
+    "meta",
+    "infrastructure"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "type": "string"
+        }
+      }
+    },
+    "infrastructure": {
+      "type": "object",
+      "required": [
+        "type",
+        "attachment"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "static",
+            "dynamic"
+          ]
+        },
+        "attachment": {
+          "type": "object",
+          "required": [
+            "provide"
+          ],
+          "properties": {
+            "provide": {
+              "type": "string"
+            }
+          }
+        },
+        "container": {
+          "type": "object",
+          "required": [
+            "image_name",
+            "build_engine",
+            "build_path",
+            "memory_limit",
+            "storage_limit",
+            "allow_outgoing_internet"
+          ],
+          "oneOf": [
+            {
+              "required": [
+                "expose_port"
+              ],
+              "not": {
+                "required": [
+                  "ports"
+                ]
+              }
+            },
+            {
+              "required": [
+                "ports"
+              ],
+              "not": {
+                "required": [
+                  "expose_port"
+                ]
+              }
+            }
+          ],
+          "properties": {
+            "image_name": {
+              "type": "string"
+            },
+            "build_engine": {
+              "type": "string",
+              "enum": [
+                "dockerfile",
+                "compose"
+              ]
+            },
+            "build_path": {
+              "type": "string"
+            },
+            "expose_port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535,
+              "description": "Bentuk single-port (legacy). Setara dengan ports: [{name: 'main', port: N}]. Tidak boleh dipakai bersama ports."
+            },
+            "ports": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4,
+              "description": "Bentuk multi-port. Entri pertama adalah port primary. Tidak boleh dipakai bersama expose_port.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "port"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_-]{0,15}$"
+                  },
+                  "port": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535
+                  },
+                  "protocol": {
+                    "type": "string",
+                    "enum": [
+                      "tcp",
+                      "http"
+                    ],
+                    "default": "tcp"
+                  }
+                }
+              }
+            },
+            "memory_limit": {
+              "type": "string",
+              "pattern": "^(64|128|256|512|1024)m$|^1g$",
+              "description": "Batas RAM. Pilihan: 64m, 128m, 256m, 512m, 1024m, atau 1g."
+            },
+            "storage_limit": {
+              "type": "string",
+              "pattern": "^(64|128|256|512|1024)m$|^1g$",
+              "description": "Batas Disk Writable Layer. Pilihan: 64m, 128m, 256m, 512m, 1024m, atau 1g."
+            },
+            "allow_outgoing_internet": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "infrastructure": {
+            "properties": {
+              "type": {
+                "const": "dynamic"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "infrastructure": {
+            "required": [
+              "container"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
